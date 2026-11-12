@@ -2,6 +2,9 @@
 FROM 3dsinteractive/playwright:1.63-ffmpeg
 
 ENV NODE_ENV=production \
+    MCP_TRANSPORT=http \
+    HOST=0.0.0.0 \
+    PORT=8000 \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
     PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
     FFMPEG_BIN=/usr/bin/ffmpeg \
@@ -12,6 +15,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 # Browser and recording tools import playwright and ffmpeg-static at runtime.
 # ffmpeg-static reuses FFMPEG_BIN when it exists, avoiding its GitHub download.
+RUN npm ci --include=dev && npm cache clean --force
 
 COPY tsconfig.json ./
 COPY src ./src
@@ -27,3 +31,5 @@ ENV HOME=/home/pwuser
 RUN node --input-type=module -e 'import { chromium } from "playwright"; const browser = await chromium.launch(); try { const page = await browser.newPage(); await page.setContent("<h1>Browser check</h1>"); await page.screenshot(); } finally { await browser.close(); }'
 
 ENTRYPOINT ["node", "dist/cli.js"]
+
+EXPOSE 8000

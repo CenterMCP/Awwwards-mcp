@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { serveStdio } from "@modelcontextprotocol/server/stdio";
+import { startMcpServer } from "./transport.js";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { readFileSync } from "node:fs";
@@ -41,6 +41,16 @@ const pkgJson = JSON.parse(
   readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../package.json"), "utf8"),
 ) as { version: string };
 
+const httpServer = await startMcpServer(() => createServer({ handlers, version: pkgJson.version }));
+if (httpServer) {
+  const shutdown = () => {
+    httpServer.close(() => process.exit(0));
+    httpServer.closeAllConnections();
+  };
+  process.once("SIGTERM", shutdown);
+  process.once("SIGINT", shutdown);
+}
+
 // Auto-refresh: if the index is stale (or absent) and no crawl is running,
 // re-index in the background. Serving is never blocked; errors are stderr-only.
 if (shouldAutoIndex(cache)) {
@@ -60,8 +70,4 @@ checkForUpdate(pkgJson.version);
 // hint at the optional webcrack bundle-de-obfuscation dep; stderr-only,
 // never blocks serving.
 checkEnvironment();
-
-serveStdio(() => createServer({ handlers, version: pkgJson.version }), {
-  onerror: (error) => console.error(`awwwards-mcp: server error: ${error.message}`),
-});
 

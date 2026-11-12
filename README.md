@@ -1138,15 +1138,19 @@ printf '%s' "$DOCKER_HUB_TOKEN" | ./docker-build.sh username/awwwards-mcp latest
 # Optional: PLATFORMS=linux/amd64,linux/arm64 (default: linux/amd64)
 ```
 
-The image uses the official Playwright base with preinstalled browsers, plus
-system FFmpeg for recording tools. Keep the base image tag in `Dockerfile` in
-sync with the Playwright version in `package-lock.json`. Run the
-stdio MCP server with an interactive stdin and a persistent cache:
+The image includes Playwright browsers and system FFmpeg for recording tools.
+Keep the base image's Playwright version in sync with `package-lock.json`.
+The container serves Streamable HTTP at `http://0.0.0.0:8000/mcp`, with a health
+endpoint at `/healthz`. It starts listening before background indexing runs.
+`HOST` and `PORT` configure the listener. Run it with a persistent cache:
 
 ```bash
-docker run --rm -i --init --shm-size=1g \
+docker run --rm --init --shm-size=1g -p 8000:8000 \
   -v awwwards-cache:/home/node/.awwwards-mcp username/awwwards-mcp:latest
 ```
+
+Local CLI clients continue to use stdio by default. To use stdio in the container,
+add `-i -e MCP_TRANSPORT=stdio` to `docker run`.
 
 ```bash
 npm install
