@@ -1,5 +1,5 @@
 # Keep this tag in sync with the Playwright version in package-lock.json.
-FROM mcr.microsoft.com/playwright:v1.63.0-noble
+FROM 3dsinteractive/playwright:1.63-ffmpeg
 
 ENV NODE_ENV=production \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
@@ -12,12 +12,6 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 # Browser and recording tools import playwright and ffmpeg-static at runtime.
 # ffmpeg-static reuses FFMPEG_BIN when it exists, avoiding its GitHub download.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends ffmpeg \
-    && npm ci --include=dev \
-    && node --input-type=module -e 'import ffmpeg from "ffmpeg-static"; import { execFileSync } from "node:child_process"; execFileSync(ffmpeg, ["-version"], { stdio: "inherit" });' \
-    && npm cache clean --force \
-    && rm -rf /var/lib/apt/lists/*
 
 COPY tsconfig.json ./
 COPY src ./src
