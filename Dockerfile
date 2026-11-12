@@ -2,13 +2,18 @@ FROM node:24-bookworm-slim
 
 ENV NODE_ENV=production \
     PLAYWRIGHT_BROWSERS_PATH=/opt/playwright \
+    FFMPEG_BIN=/usr/bin/ffmpeg \
     AWWWARDS_CACHE_DIR=/home/node/.awwwards-mcp
 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
 # Browser and recording tools import playwright and ffmpeg-static at runtime.
-RUN npm ci --include=dev \
+# ffmpeg-static reuses FFMPEG_BIN when it exists, avoiding its GitHub download.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ffmpeg \
+    && npm ci --include=dev \
+    && node --input-type=module -e 'import ffmpeg from "ffmpeg-static"; import { execFileSync } from "node:child_process"; execFileSync(ffmpeg, ["-version"], { stdio: "inherit" });' \
     && npx playwright install --with-deps chromium \
     && npm cache clean --force \
     && rm -rf /var/lib/apt/lists/*
