@@ -1,0 +1,11 @@
+.git
+node_modules
+dist
+assets
+benchmarks
+docs
+showcase
+test
+*.log
+.env
+.env.*

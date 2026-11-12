@@ -1130,6 +1130,22 @@ templates. Security problems go privately — see
 
 ## Development
 
+Build and publish a Docker image (requires Docker Buildx). Supply the Docker Hub
+token on stdin; the repository must be under the supplied username:
+
+```bash
+printf '%s' "$DOCKER_HUB_TOKEN" | ./docker-build.sh username/awwwards-mcp latest username
+# Optional: PLATFORMS=linux/amd64,linux/arm64 (default: linux/amd64)
+```
+
+The image includes Chromium and FFmpeg for browser and recording tools. Run the
+stdio MCP server with an interactive stdin and a persistent cache:
+
+```bash
+docker run --rm -i --init --shm-size=1g \
+  -v awwwards-cache:/home/node/.awwwards-mcp username/awwwards-mcp:latest
+```
+
 ```bash
 npm install
 npm test        # offline unit tests against committed HTML fixtures
