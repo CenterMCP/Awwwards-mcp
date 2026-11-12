@@ -63,6 +63,7 @@ printf '%s' "${DOCKER_HUB_TOKEN}" |
 
 docker buildx build \
   --platform "${PLATFORMS}" \
+  --build-arg "PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT=${PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT:-180000}" \
   --pull \
   --tag "${IMAGE}" \
   --push \

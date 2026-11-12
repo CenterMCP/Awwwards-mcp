@@ -14,9 +14,13 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ffmpeg \
     && npm ci --include=dev \
     && node --input-type=module -e 'import ffmpeg from "ffmpeg-static"; import { execFileSync } from "node:child_process"; execFileSync(ffmpeg, ["-version"], { stdio: "inherit" });' \
-    && npx playwright install --with-deps chromium \
+    && npx playwright install-deps chromium \
     && npm cache clean --force \
     && rm -rf /var/lib/apt/lists/*
+
+# Cache packages separately from the large browser download, which can stall.
+ARG PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT=180000
+RUN npx playwright install chromium
 
 COPY tsconfig.json ./
 COPY src ./src

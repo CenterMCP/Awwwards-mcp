@@ -1136,6 +1136,7 @@ token on stdin; the repository must be under the supplied username:
 ```bash
 printf '%s' "$DOCKER_HUB_TOKEN" | ./docker-build.sh username/awwwards-mcp latest username
 # Optional: PLATFORMS=linux/amd64,linux/arm64 (default: linux/amd64)
+# Optional: PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT=300000 (default: 180000 ms)
 ```
 
 The image includes Chromium and FFmpeg for browser and recording tools. Run the
